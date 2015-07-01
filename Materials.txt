@@ -1,0 +1,8 @@
+Musical Love Cube Material List
+>Rasberrypi 85.60mm x 56mm x 21mm
+>SD Card (1GB)
+>Gyroscope MPU 6050 
+>Battery (2x) 
+>Battery Case (3D print); file saved 
+>Speaker 
+>Cosmetics: LED (maybe RGB strips) w/ translucent printing material 
