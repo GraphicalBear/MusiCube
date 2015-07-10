@@ -1,7 +1,5 @@
-#!/usr/bin/env python
 """
 An audio synthesis library for Python.
-
 It makes heavy use of the `itertools` module.
 Good luck! (This is a work in progress.)
 """
@@ -19,11 +17,13 @@ __author_email__ = 'zacharydenton@gmail.com'
 __version__ = '0.2'
 __url__ = 'http://github.com/zacharydenton/wavebender'
 __longdescr__ = '''
-An audio synthesis library for Python.
+An audio synthesis library for Python. Modified slightly by Michael Ditto.
 '''
 __classifiers__ = [
     'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis'
 ]
+
+filter_wave = None
 
 def grouper(n, iterable, fillvalue=None):
     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
@@ -50,10 +50,33 @@ def square_wave(frequency=440.0, framerate=44100, amplitude=0.5):
         else:
             yield 0.0
 
+def triangle_wave(frequency = 440, framerate = 44100, amplitude = 0.5, skip_frame = 0):
+    if amplitude > 1.0:
+        amplitude = 1.0
+    if amplitude < 0.0:
+        amplitude = 0.0
+    for z in count(skip_frame):
+        triangle = (amplitude / (0.5 * math.pi)) * math.atan (math.sin (math.pi * z))
+        yield triangle
+
+def saw_wave(frequency = 440, framerate = 44100, amplitude = 0.5, skip_frame = 0):
+    if amplitude > 1.0:
+        amplitude = 1.0
+    if amplitude < 0.0:
+        amplitude = 0.0
+    for x in count(skip_frame):
+        saw_tooth = -((amplitude / (0.5 * math.pi)) * math.atan((1 / 2) *))
+        yield saw_tooth
+
 def damped_wave(frequency=440.0, framerate=44100, amplitude=0.5, length=44100):
     if amplitude > 1.0: amplitude = 1.0
     if amplitude < 0.0: amplitude = 0.0
     return (math.exp(-(float(i%length)/float(framerate))) * s for i, s in enumerate(sine_wave(frequency, framerate, amplitude)))
+
+def pass_filter(first_wave, second_wave):
+    global filter_wave
+    filter_wave = first_wave + second_wave
+    return filter_wave
 
 def white_noise(amplitude=0.5):
     '''
@@ -64,7 +87,6 @@ def white_noise(amplitude=0.5):
 def compute_samples(channels, nsamples=None):
     '''
     create a generator which computes the samples.
-
     essentially it creates a sequence of the sum of each function in the channel
     at each sample in the file for each channel.
     '''
@@ -84,7 +106,7 @@ def write_wavefile(f, samples, nframes=None, nchannels=2, sampwidth=2, framerate
     for chunk in grouper(bufsize, samples):
         frames = ''.join(''.join(struct.pack('h', int(max_amplitude * sample)) for sample in channels) for channels in chunk if channels is not None)
         w.writeframesraw(frames)
-    
+
     w.close()
 
 def write_pcm(f, samples, sampwidth=2, framerate=44100, bufsize=2048):
