@@ -65,7 +65,7 @@ def saw_wave(frequency = 440, framerate = 44100, amplitude = 0.5, skip_frame = 0
     if amplitude < 0.0:
         amplitude = 0.0
     for x in count(skip_frame):
-        saw_tooth = -((amplitude / (0.5 * math.pi)) * math.atan((1 / 2) *))
+        saw_tooth = -((amplitude / (0.5 * math.pi)) * math.atan((math.cot((math.pi) * (framerate)) / (1 / frequency)))
         yield saw_tooth
 
 def damped_wave(frequency=440.0, framerate=44100, amplitude=0.5, length=44100):
