@@ -5,9 +5,9 @@ import select
 serialPort = None
 dataIn = [None]*8
 index = 0
-gyro_list = [1]*3
+gyro_list = 1
 accel_list = [1]*3
-leds_list = [255]*12
+leds_list = [[0 for x in range(4)] for x in range(2)] 
 mode = 1
 i = 0
 
@@ -28,9 +28,11 @@ def setLEDs(newLEDs):
 	global leds_list
 	leds_list = newLEDs
 
-def setLED(led, value):
+def setLED(led, r, g, b):
 	global leds_list
-	leds_list[led] = value
+	leds_list[led][0] = r
+	leds_list[led][1] = r
+	leds_list[led][2] = r
 
 def WriteToSerial():
 	global serialPort
@@ -51,12 +53,11 @@ def ReadFromSerial():
 		index = 0
 	dataIn[index] = nextByte
 	index += 1;
-	if index is 8:
+	if index is 5:
 		mode = dataIn[1]
-		for x in range (2, 3):
-			gyro_list[x - 2] = dataIn[x]
-		for x in range (5, 7):
-			accel_list[x - 5] = dataIn[x]
+		gyro = dataIn[2]
+		for x in range (3, 5):
+			accel_list[x - 3] = dataIn[x]
 	 	index = 0
 
 def MainLoop():
@@ -72,7 +73,7 @@ while True:
 	ReadFromSerial()
 
 	#print(serialPort.readline())
-	#serialPort.write("3")
+	#serialPort.write(bytes([0]))
 	print str(i) + str(dataIn)
 	i+= 1
 
