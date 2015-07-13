@@ -1,3 +1,0 @@
-from wavebender import *
-
-main()
