@@ -1,3 +1,21 @@
+#include <Adafruit_NeoPixel.h>
+
+
+#include "I2Cdev.h"
+
+#include "MPU6050_6Axis_MotionApps20.h"
+//#include "MPU6050.h" // not necessary if using MotionApps include file
+
+// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
+// is used in I2Cdev.h
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    #include "Wire.h"
+#endif
+
+
+
+#define PIN 4
+#define LED_COUNT 5
 
 byte INDEX = 0;
 byte mode = 1;
@@ -8,6 +26,15 @@ byte data[14] = { };
 
 
 
+Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
+
+void setMode(byte newMode) {
+  mode = newMode;
+}
+
+byte conv(float input) {
+  return ((byte) ((input + 300) / 24));
+}
 
 void sendDataPacket() {
   Serial.write(0);
@@ -94,16 +121,7 @@ THE SOFTWARE.
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
-#include "I2Cdev.h"
 
-#include "MPU6050_6Axis_MotionApps20.h"
-//#include "MPU6050.h" // not necessary if using MotionApps include file
-
-// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
-// is used in I2Cdev.h
-#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-    #include "Wire.h"
-#endif
 
 // class default I2C address is 0x68
 // specific I2C addresses may be passed as a parameter here
@@ -209,6 +227,10 @@ void dmpDataReady() {
 // ================================================================
 
 void setup() {
+
+   led_matrix.begin();  // Call this to start up the LED strip.
+     // This function, defined below, turns all LEDs off...
+   led_matrix.show();   // ...but the LEDs don't actually update until you call this.
   
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -298,10 +320,12 @@ void loop() {
     // wait for MPU interrupt or extra packet(s) available
     while (!mpuInterrupt && fifoCount < packetSize) {
 
-
+     
       sendDataPacket();
-      delay(100);
-        
+      if (Serial.available() > 0) {
+        updateByteData(Serial.read());
+      }
+         
     }
 
     // reset interrupt flag and get INT_TATUS byte

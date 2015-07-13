@@ -22,8 +22,8 @@
 #include <Adafruit_NeoPixel.h>
 #include "WS2812_Definitions.h"
 
-#define PIN 4
-#define LED_COUNT 5
+#define PIN 3
+#define LED_COUNT 4
 
 // Create an instance of the Adafruit_NeoPixel class called "leds".
 // That'll be what we refer to from here on...
@@ -33,33 +33,37 @@ void setup()
 {
   leds.begin();  // Call this to start up the LED strip.
   clearLEDs();   // This function, defined below, turns all LEDs off...
+  leds.setPixelColor(1,255,0,0);
+  leds.setPixelColor(1,0,0,255);
+  leds.setPixelColor(1,0,255,0);
+  leds.setPixelColor(1,255,255,255);
   leds.show();   // ...but the LEDs don't actually update until you call this.
 }
 
 void loop()
 {
-  // Ride the Rainbow Road
-  for (int i=0; i<LED_COUNT*10; i++)
-  {
-    rainbow(i);
-    delay(100);  // Delay between rainbow slides
-  }
-  
-  // Indigo cylon
-  // Do a cylon (larson scanner) cycle 10 times
-  for (int i=0; i<10; i++)
-  {
-    // cylon function: first param is color, second is time (in ms) between cycles
-    cylon(INDIGO, 500);  // Indigo cylon eye!
-  }
-  
-  // A light shower of spring green rain
-  // This will run the cascade from top->bottom 20 times
-  for (int i=0; i<20; i++)
-  {
-    // First parameter is the color, second is direction, third is ms between falls
-    cascade(MEDIUMSPRINGGREEN, TOP_DOWN, 100); 
-  }
+//  // Ride the Rainbow Road
+//  for (int i=0; i<LED_COUNT*10; i++)
+//  {
+//    rainbow(i);
+//    delay(100);  // Delay between rainbow slides
+//  }
+//  
+//  // Indigo cylon
+//  // Do a cylon (larson scanner) cycle 10 times
+//  for (int i=0; i<10; i++)
+//  {
+//    // cylon function: first param is color, second is time (in ms) between cycles
+//    cylon(INDIGO, 500);  // Indigo cylon eye!
+//  }
+//  
+//  // A light shower of spring green rain
+//  // This will run the cascade from top->bottom 20 times
+//  for (int i=0; i<20; i++)
+//  {
+//    // First parameter is the color, second is direction, third is ms between falls
+//    cascade(MEDIUMSPRINGGREEN, TOP_DOWN, 100); 
+//  }
 }
 
 // Implements a little larson "cylon" sanner.

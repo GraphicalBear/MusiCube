@@ -4,10 +4,11 @@ import select
 
 serialPort = None
 dataIn = [None]*8
+arduino_mode = None
 index = 0
 gyro_list = 1
 accel_list = [1]*3
-leds_list = [[0 for x in range(4)] for x in range(2)] 
+leds_list = [[1 for x in range(4)] for x in range(2)] 
 mode = 1
 i = 0
 
@@ -24,6 +25,10 @@ def switchMode(newMode):
 	global mode
 	mode = newMode
 
+def setMode(newMode):
+	global mode
+	mode = newMode
+
 def setLEDs(newLEDs):
 	global leds_list
 	leds_list = newLEDs
@@ -31,8 +36,8 @@ def setLEDs(newLEDs):
 def setLED(led, r, g, b):
 	global leds_list
 	leds_list[led][0] = r
-	leds_list[led][1] = r
-	leds_list[led][2] = r
+	leds_list[led][1] = g
+	leds_list[led][2] = b
 
 def WriteToSerial():
 	global serialPort
@@ -48,34 +53,38 @@ def ReadFromSerial():
 	global index
 	global accel_list
 	global gyro_list
-	nextByte = struct.unpack('B', serialPort.read(1))[0]
-	if nextByte is 0:
-		index = 0
-	dataIn[index] = nextByte
-	index += 1;
-	if index is 5:
-		mode = dataIn[1]
+	global arduino_mode
+	if (serialPort.inWaiting() >= 6):
+		for (int i = 0; i < 6; i++):
+			nextByte = struct.unpack('B', serialPort.read(1))[0]
+			if nextByte is 0:
+				index = 0
+			dataIn[index] = nextByte
+			index+= 1
+		arduino_mode = dataIn[1]
 		gyro = dataIn[2]
 		for x in range (3, 5):
 			accel_list[x - 3] = dataIn[x]
-	 	index = 0
+		serialPort.flushInput()
 
-def MainLoop():
-	while True:
-		ReadFromSerial()
-
+def UpdateLEDs():
+	print "do stuff"
 
 def main():
-	MainLoop()
+	global arduino_mode
+	SerialInit()
+	setMode(2)
+	while arduino_mode is not 2:
+		ReadFromSerial()
 
-SerialInit()
-while True:
-	ReadFromSerial()
+	while True:
+		ReadFromSerial()
+		UpdateLEDs()
+		WriteToSerial()
 
-	#print(serialPort.readline())
-	#serialPort.write(bytes([0]))
-	print str(i) + str(dataIn)
-	i+= 1
+
+
+
 
 
 if __name__ is '__main__':
