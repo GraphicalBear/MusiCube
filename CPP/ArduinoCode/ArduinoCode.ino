@@ -389,31 +389,23 @@ void loop() {
       }
       
       if (mode == 1) {
-        if (Serial.available()) {
-          mode = Serial.read();
-        }
- 
         sendDataPacket();
+         for (int i=0; i<LED_COUNT*10; i++) {
+          rainbow(i);
+          delay(100);
+        } 
       }
 
       if (mode == 2) {
         Still_Alive();
-        mode = 0;
+        mode = 1;
       }
       
-      if (mode == 3) {
-        if (Serial.available()) {
-          mode = Serial.read();
-          break;
-        }
-        for (int i=0; i<LED_COUNT*10; i++) {
-          rainbow(i);
-          delay(100);
-        }
-  
-      }
-
+    
       mode = Serial.read();
+      while (Serial.available()) {
+        Serial.read();
+      }
          
     }
 
