@@ -23,25 +23,211 @@
 #include "WS2812_Definitions.h"
 
 #define PIN 3
-#define LED_COUNT 4
+#define LED_COUNT 5
 
 // Create an instance of the Adafruit_NeoPixel class called "leds".
 // That'll be what we refer to from here on...
-Adafruit_NeoPixel leds = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
+
+
+void clearLEDs()
+{
+  for (int i=0; i<LED_COUNT; i++)
+  {
+    led_matrix.setPixelColor(i, 0);
+  }
+  led_matrix.show();
+}
+
+void lowOn() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 26, 122, 232);
+  }
+  led_matrix.show();
+}
+
+void beat()  {
+   for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 0, 255, 255);
+  }
+  led_matrix.show();
+  delay(850);
+  clearLEDs();
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 230, 0, 255);
+  }
+  led_matrix.show();
+  delay(180);
+  clearLEDs();
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 0, 255, 60);
+  }
+  led_matrix.show();
+  delay(950);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void oppBeat() {
+  led_matrix.setPixelColor(4, 255, 90, 233);
+  led_matrix.setPixelColor(0, 0, 0, 255);
+  led_matrix.setPixelColor(2, 0, 0, 255);
+  led_matrix.show();
+  delay(1005);
+  clearLEDs();
+  led_matrix.setPixelColor(4, 255, 90, 233);
+  led_matrix.setPixelColor(1, 240, 120, 0);
+  led_matrix.setPixelColor(3, 240, 120, 0);
+  led_matrix.show();
+  delay(1005);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void fullBeat() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255, 174, 0);
+  }
+  led_matrix.show();
+  delay(1030);
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 0, 0, 255);
+  }
+  led_matrix.show();
+  delay(950);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void pulse() {
+  led_matrix.setPixelColor(4, 255, 255, 255);
+  led_matrix.setPixelColor(0, 0, 0, 255);
+  led_matrix.show();
+  delay(250);
+  clearLEDs();
+  led_matrix.setPixelColor(4, 255, 255, 255);
+  led_matrix.setPixelColor(1, 0, 0, 255);
+  led_matrix.show();
+  delay(250);
+  clearLEDs();
+  led_matrix.setPixelColor(4, 255, 255, 255);
+  led_matrix.setPixelColor(2, 0, 0, 255);
+  led_matrix.show();
+  delay(250);
+  clearLEDs();
+  led_matrix.setPixelColor(4, 255, 255, 255);
+  led_matrix.setPixelColor(3, 0, 0, 255);
+  led_matrix.show();
+  delay(250);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void Still_Alive() {
+  lowOn();
+  delay(1000);
+  for (int i = 0; i <= 29; i++) {
+    pulse();
+  }
+  lowOn();
+  delay(500);
+  for (int i = 0; i <= 6; i++) {
+    beat();
+  }
+  for (int i = 0; i <= 18; i++) {
+    oppBeat();
+  }
+  for (int i = 0; i <= 10; i++) {
+    fullBeat();
+  }
+  for (int i = 0; i <= 15; i++) {
+    pulse();
+  }
+  for (int i = 0; i <= 7; i++) {
+    oppBeat();
+  }
+  for (int i = 0; i <= 7; i++) {
+    fullBeat();
+  }
+  for (int i = 0; i <= 20; i++) {
+    pulse();
+  }
+  led_matrix.setPixelColor(4, 255, 255, 255);
+  for (int i = 0; i < LED_COUNT - 1; i++) {
+    led_matrix.setPixelColor(i, 255, 0, 0);
+  }
+  led_matrix.show();
+  delay(3000);
+  for (int i = 0; i < LED_COUNT - 1; i++) {
+    led_matrix.setPixelColor(i, 0, 0, 0);
+  }
+  led_matrix.show();
+  delay(10000);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void QuarterNote(float pitch) {
+  clearLEDs();
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255 * pitch, 0, 0);
+  }
+  led_matrix.show();
+  delay(60);
+  clearLEDs();
+  led_matrix.show();
+  delay(100);
+}
+
+void HalfNote(byte pitch) {
+  clearLEDs();
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255 * pitch, 0, 0);
+  }
+  led_matrix.show();
+  delay(60);
+  clearLEDs();
+  led_matrix.show();
+  delay(260);
+}
+
+void QuarterRest() {
+  clearLEDs();
+  led_matrix.show();
+  delay(160);
+}
+
+void HalfRest() {
+  clearLEDs();
+  led_matrix.show();
+  delay(160);
+}
+
+void Mario_Overworld() {
+  led_matrix.setPixelColor(0,244, 245,0);
+  led_matrix.setPixelColor(1,244, 245,0);
+  led_matrix.setPixelColor(2,244, 245,0);
+  led_matrix.setPixelColor(3,244, 245,0);
+  led_matrix.setPixelColor(4,255, 0,0);
+  led_matrix.show();
+  delay(81500);
+  clearLEDs();
+  
+  
+  
+}
 
 void setup()
 {
-  leds.begin();  // Call this to start up the LED strip.
+  led_matrix.begin();  // Call this to start up the LED strip.
   clearLEDs();   // This function, defined below, turns all LEDs off...
-  leds.setPixelColor(1,255,0,0);
-  leds.setPixelColor(1,0,0,255);
-  leds.setPixelColor(1,0,255,0);
-  leds.setPixelColor(1,255,255,255);
-  leds.show();   // ...but the LEDs don't actually update until you call this.
+  led_matrix.show();   // ...but the LEDs don't actually update until you call this.
 }
 
 void loop()
 {
+   Mario_Overworld();
+  
 //  // Ride the Rainbow Road
 //  for (int i=0; i<LED_COUNT*10; i++)
 //  {
@@ -68,139 +254,18 @@ void loop()
 
 // Implements a little larson "cylon" sanner.
 // This'll run one full cycle, down one way and back the other
-void cylon(unsigned long color, byte wait)
-{
-  // weight determines how much lighter the outer "eye" colors are
-  const byte weight = 4;  
-  // It'll be easier to decrement each of these colors individually
-  // so we'll split them out of the 24-bit color value
-  byte red = (color & 0xFF0000) >> 16;
-  byte green = (color & 0x00FF00) >> 8;
-  byte blue = (color & 0x0000FF);
-  
-  // Start at closest LED, and move to the outside
-  for (int i=0; i<=LED_COUNT-1; i++)
-  {
-    clearLEDs();
-    leds.setPixelColor(i, red, green, blue);  // Set the bright middle eye
-    // Now set two eyes to each side to get progressively dimmer
-    for (int j=1; j<3; j++)
-    {
-      if (i-j >= 0)
-        leds.setPixelColor(i-j, red/(weight*j), green/(weight*j), blue/(weight*j));
-      if (i-j <= LED_COUNT)
-        leds.setPixelColor(i+j, red/(weight*j), green/(weight*j), blue/(weight*j));
-    }
-    leds.show();  // Turn the LEDs on
-    delay(wait);  // Delay for visibility
-  }
-  
-  // Now we go back to where we came. Do the same thing.
-  for (int i=LED_COUNT-2; i>=1; i--)
-  {
-    clearLEDs();
-    leds.setPixelColor(i, red, green, blue);
-    for (int j=1; j<3; j++)
-    {
-      if (i-j >= 0)
-        leds.setPixelColor(i-j, red/(weight*j), green/(weight*j), blue/(weight*j));
-      if (i-j <= LED_COUNT)
-        leds.setPixelColor(i+j, red/(weight*j), green/(weight*j), blue/(weight*j));
-      }
-    
-    leds.show();
-    delay(wait);
-  }
-}
 
-// Cascades a single direction. One time.
-void cascade(unsigned long color, byte direction, byte wait)
-{
-  if (direction == TOP_DOWN)
-  {
-    for (int i=0; i<LED_COUNT; i++)
-    {
-      clearLEDs();  // Turn off all LEDs
-      leds.setPixelColor(i, color);  // Set just this one
-      leds.show();
-      delay(wait);
-    }
-  }
-  else
-  {
-    for (int i=LED_COUNT-1; i>=0; i--)
-    {
-      clearLEDs();
-      leds.setPixelColor(i, color);
-      leds.show();
-      delay(wait);
-    }
-  }
-}
 
 // Sets all LEDs to off, but DOES NOT update the display;
 // call leds.show() to actually turn them off after this.
-void clearLEDs()
-{
-  for (int i=0; i<LED_COUNT; i++)
-  {
-    leds.setPixelColor(i, 0);
-  }
-}
 
 // Prints a rainbow on the ENTIRE LED strip.
 //  The rainbow begins at a specified position. 
 // ROY G BIV!
-void rainbow(byte startPosition) 
-{
-  // Need to scale our rainbow. We want a variety of colors, even if there
-  // are just 10 or so pixels.
-  int rainbowScale = 192 / LED_COUNT;
-  
-  // Next we setup each pixel with the right color
-  for (int i=0; i<LED_COUNT; i++)
-  {
-    // There are 192 total colors we can get out of the rainbowOrder function.
-    // It'll return a color between red->orange->green->...->violet for 0-191.
-    leds.setPixelColor(i, rainbowOrder((rainbowScale * (i + startPosition)) % 192));
-  }
-  // Finally, actually turn the LEDs on:
-  leds.show();
-}
+
 
 // Input a value 0 to 191 to get a color value.
 // The colors are a transition red->yellow->green->aqua->blue->fuchsia->red...
 //  Adapted from Wheel function in the Adafruit_NeoPixel library example sketch
-uint32_t rainbowOrder(byte position) 
-{
-  // 6 total zones of color change:
-  if (position < 31)  // Red -> Yellow (Red = FF, blue = 0, green goes 00-FF)
-  {
-    return leds.Color(0xFF, position * 8, 0);
-  }
-  else if (position < 63)  // Yellow -> Green (Green = FF, blue = 0, red goes FF->00)
-  {
-    position -= 31;
-    return leds.Color(0xFF - position * 8, 0xFF, 0);
-  }
-  else if (position < 95)  // Green->Aqua (Green = FF, red = 0, blue goes 00->FF)
-  {
-    position -= 63;
-    return leds.Color(0, 0xFF, position * 8);
-  }
-  else if (position < 127)  // Aqua->Blue (Blue = FF, red = 0, green goes FF->00)
-  {
-    position -= 95;
-    return leds.Color(0, 0xFF - position * 8, 0xFF);
-  }
-  else if (position < 159)  // Blue->Fuchsia (Blue = FF, green = 0, red goes 00->FF)
-  {
-    position -= 127;
-    return leds.Color(position * 8, 0, 0xFF);
-  }
-  else  //160 <position< 191   Fuchsia->Red (Red = FF, green = 0, blue goes FF->00)
-  {
-    position -= 159;
-    return leds.Color(0xFF, 0x00, 0xFF - position * 8);
-  }
-}
+
+

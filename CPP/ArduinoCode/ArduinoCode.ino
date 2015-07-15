@@ -12,53 +12,35 @@
     #include "Wire.h"
 #endif
 
-
-
-#define PIN 4
+#define PIN 3
 #define LED_COUNT 5
 
-byte INDEX = 0;
-byte mode = 1;
+byte mode = 0;
 byte gyro = 1;
 byte accel[3] = { };
-byte leds[12] = { };
-byte data[14] = { };
+byte gyro_list[0] = { };
+byte ledRed = 0;
+byte ledGreen = 0;
+byte ledBlue = 0;
+byte motion = 0;
 
 
 
 Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(LED_COUNT, PIN, NEO_GRB + NEO_KHZ800);
 
-void setMode(byte newMode) {
-  mode = newMode;
-}
-
 byte conv(float input) {
-  return ((byte) ((input + 300) / 24));
+  return ((byte) ((input + 3000) / 120));
 }
 
 void sendDataPacket() {
-  Serial.write(0);
-  Serial.write(mode);
-  Serial.write(gyro);
-  for (int i = 0; i < 3; i++) {
-    Serial.write(accel[i]);
-  }
+  //Serial.println((250 + gyro));
+  //Serial.println((0 + accel[0]));
+  //Serial.println((100 + accel[1]));
+  //Serial.println((200 + accel[2]));
+  
+  Serial.println(motion);
 }
 
-void updateByteData(byte newData) {
-  if (newData == 0) {
-    INDEX = 0;
-  }
-  data[INDEX] = newData;
-  INDEX++;
-  if (INDEX == 14) {
-    mode = data[1];
-    for (int i = 2; i < 14; i++) {
-      leds[i - 2] = data[i];
-    }
-    INDEX = 0;
-  }
-}
 
 void updateGyroData(float y, float z) {
 
@@ -71,118 +53,194 @@ void updateGyroData(float y, float z) {
   } else if (y <= 45 && y >= -90 && z >= -45 && z <= 45) {
     gyro = 5;
   } else if (y >= -45 && y <= 45 && z >= -45 && z <= 45) {
-    gyro = 6;
+    gyro = 1;
   } else {
     gyro = 1;
   }
 }
 
+void clearLEDs()
+{
+  for (int i=0; i<LED_COUNT; i++)
+  {
+    led_matrix.setPixelColor(i, 0);
+  }
+  led_matrix.show();
+}
+
+void lowOn() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 26, 122, 232);
+  }
+  led_matrix.show();
+}
+
+void solidColor(byte r, byte g, byte b) {
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, r, g, b);
+  }
+  led_matrix.show();
+}
+
+void beat()  {
+   for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255, 128, 244);
+  }
+  led_matrix.show();
+  delay(850);
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 206, 128, 255);
+  }
+  led_matrix.show();
+  delay(180);
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255, 128, 223);
+  }
+  led_matrix.show();
+  delay(950);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void oppBeat() {
+   for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 242, 255, 0);
+  }
+  led_matrix.show();
+  delay(1030);
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255, 0, 0);
+  }
+  led_matrix.show();
+  delay(950);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void fullBeat() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 0, 255, 255);
+  }
+  led_matrix.show();
+  delay(1030);
+  for (int i = 0; i < LED_COUNT; i++) {
+    led_matrix.setPixelColor(i, 255, 0, 255);
+  }
+  led_matrix.show();
+  delay(950);
+  clearLEDs();
+  led_matrix.show();
+}
+
+void pulse() {
+  led_matrix.setPixelColor(0, 0, 255, 81);
+  led_matrix.show();
+  delay(250);
+  led_matrix.setPixelColor(1, 0, 255, 208);
+  led_matrix.show();
+  delay(250);
+  led_matrix.setPixelColor(2, 0, 195, 255);
+  led_matrix.show();
+  delay(250);
+  led_matrix.setPixelColor(3, 0, 119, 255);
+  led_matrix.show();
+  delay(250);
+  clearLEDs();
+  led_matrix.show();
+}
 
 
-// I2C device class (I2Cdev) demonstration Arduino sketch for MPU6050 class using DMP (MotionApps v2.0)
-// 6/21/2012 by Jeff Rowberg <jeff@rowberg.net>
-// Updates should (hopefully) always be available at https://github.com/jrowberg/i2cdevlib
-//
-// Changelog:
-//      2013-05-08 - added seamless Fastwire support
-//                 - added note about gyro calibration
-//      2012-06-21 - added note about Arduino 1.0.1 + Leonardo compatibility error
-//      2012-06-20 - improved FIFO overflow handling and simplified read process
-//      2012-06-19 - completely rearranged DMP initialization code and simplification
-//      2012-06-13 - pull gyro and accel data from FIFO packet instead of reading directly
-//      2012-06-09 - fix broken FIFO read sequence and change interrupt detection to RISING
-//      2012-06-05 - add gravity-compensated initial reference frame acceleration output
-//                 - add 3D math helper file to DMP6 example sketch
-//                 - add Euler output and Yaw/Pitch/Roll output formats
-//      2012-06-04 - remove accel offset clearing for better results (thanks Sungon Lee)
-//      2012-06-01 - fixed gyro sensitivity to be 2000 deg/sec instead of 250
-//      2012-05-30 - basic DMP initialization working
+uint32_t rainbowOrder(byte position) 
+{
+  // 6 total zones of color change:
+  if (position < 31)  // Red -> Yellow (Red = FF, blue = 0, green goes 00-FF)
+  {
+    return led_matrix.Color(0xFF, position * 8, 0);
+  }
+  else if (position < 63)  // Yellow -> Green (Green = FF, blue = 0, red goes FF->00)
+  {
+    position -= 31;
+    return led_matrix.Color(0xFF - position * 8, 0xFF, 0);
+  }
+  else if (position < 95)  // Green->Aqua (Green = FF, red = 0, blue goes 00->FF)
+  {
+    position -= 63;
+    return led_matrix.Color(0, 0xFF, position * 8);
+  }
+  else if (position < 127)  // Aqua->Blue (Blue = FF, red = 0, green goes FF->00)
+  {
+    position -= 95;
+    return led_matrix.Color(0, 0xFF - position * 8, 0xFF);
+  }
+  else if (position < 159)  // Blue->Fuchsia (Blue = FF, green = 0, red goes 00->FF)
+  {
+    position -= 127;
+    return led_matrix.Color(position * 8, 0, 0xFF);
+  }
+  else  //160 <position< 191   Fuchsia->Red (Red = FF, green = 0, blue goes FF->00)
+  {
+    position -= 159;
+    return led_matrix.Color(0xFF, 0x00, 0xFF - position * 8);
+  }
+}
 
-/* ============================================
-I2Cdev device library code is placed under the MIT license
-Copyright (c) 2012 Jeff Rowberg
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-===============================================
-*/
+void rainbow(byte startPosition) 
+{
+  // Need to scale our rainbow. We want a variety of colors, even if there
+  // are just 10 or so pixels.
+  int rainbowScale = 192 / LED_COUNT;
+  
+  // Next we setup each pixel with the right color
+  for (int i=0; i<LED_COUNT; i++)
+  {
+    // There are 192 total colors we can get out of the rainbowOrder function.
+    // It'll return a color between red->orange->green->...->violet for 0-191.
+    led_matrix.setPixelColor(i, rainbowOrder((rainbowScale * (i + startPosition)) % 192));
+  }
+  // Finally, actually turn the LEDs on:
+  led_matrix.show();
+}
 
-// I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
-// for both classes must be in the include path of your project
+void Still_Alive() {
+  lowOn();
+  delay(1000);
+  for (int i = 0; i <= 29; i++) {
+    pulse();
+  }
+  lowOn();
+  delay(1000);
+  for (int i = 0; i <= 7; i++) {
+    beat();
+  }
+  for (int i = 0; i <= 18; i++) {
+    oppBeat();
+  }
+  for (int i = 0; i <= 11; i++) {
+    fullBeat();
+  }
+  for (int i = 0; i <= 16; i++) {
+    pulse();
+  }
+  for (int i = 0; i <= 7; i++) {
+    oppBeat();
+  }
+  for (int i = 0; i <= 7; i++) {
+    fullBeat();
+  }
+  for (int i = 0; i <= 23; i++) {
+    pulse();
+  }
+  lowOn();
+  delay(3000);
+  clearLEDs();
+  led_matrix.show();
+}
 
-
-// class default I2C address is 0x68
-// specific I2C addresses may be passed as a parameter here
-// AD0 low = 0x68 (default for SparkFun breakout and InvenSense evaluation board)
-// AD0 high = 0x69
 MPU6050 mpu;
-//MPU6050 mpu(0x69); // <-- use for AD0 high
-
-/* =========================================================================
-   NOTE: In addition to connection 3.3v, GND, SDA, and SCL, this sketch
-   depends on the MPU-6050's INT pin being connected to the Arduino's
-   external interrupt #0 pin. On the Arduino Uno and Mega 2560, this is
-   digital I/O pin 2.
- * ========================================================================= */
-
-/* =========================================================================
-   NOTE: Arduino v1.0.1 with the Leonardo board generates a compile error
-   when using Serial.write(buf, len). The Teapot output uses this method.
-   The solution requires a modification to the Arduino USBAPI.h file, which
-   is fortunately simple, but annoying. This will be fixed in the next IDE
-   release. For more info, see these links:
-   http://arduino.cc/forum/index.php/topic,109987.0.html
-   http://code.google.com/p/arduino/issues/detail?id=958
- * ========================================================================= */
 
 
-
-// uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
-// quaternion components in a [w, x, y, z] format (not best for parsing
-// on a remote host such as Processing or something though)
-//#define OUTPUT_READABLE_QUATERNION
-
-// uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
-// (in degrees) calculated from the quaternions coming from the FIFO.
-// Note that Euler angles suffer from gimbal lock (for more info, see
-// http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_EULER
-
-// uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
-// pitch/roll angles (in degrees) calculated from the quaternions coming
-// from the FIFO. Note this also requires gravity vector calculations.
-// Also note that yaw/pitch/roll angles suffer from gimbal lock (for
-// more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
 #define OUTPUT_READABLE_YAWPITCHROLL
-
-// uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
-// components with gravity removed. This acceleration reference frame is
-// not compensated for orientation, so +X is always +X according to the
-// sensor, just without the effects of gravity. If you want acceleration
-// compensated for orientation, us OUTPUT_READABLE_WORLDACCEL instead.
-//#define OUTPUT_READABLE_REALACCEL
-
-// uncomment "OUTPUT_READABLE_WORLDACCEL" if you want to see acceleration
-// components with gravity removed and adjusted for the world frame of
-// reference (yaw is relative to initial orientation, since no magnetometer
-// is present in this case). Could be quite handy in some cases.
-//#define OUTPUT_READABLE_WORLDACCEL
-
-// uncomment "OUTPUT_TEAPOT" if you want output that matches the
-// format used for the InvenSense teapot demo
-//#define OUTPUT_TEAPOT
+#define OUTPUT_READABLE_WORLDACCEL
 
 
 
@@ -227,11 +285,13 @@ void dmpDataReady() {
 // ================================================================
 
 void setup() {
+  
 
    led_matrix.begin();  // Call this to start up the LED strip.
      // This function, defined below, turns all LEDs off...
    led_matrix.show();   // ...but the LEDs don't actually update until you call this.
-  
+
+    solidColor(255, 255, 255);
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
@@ -263,7 +323,7 @@ void setup() {
     // wait for ready
     Serial.println(F("\nSend any character to begin DMP programming and demo: "));
     while (Serial.available() && Serial.read()); // empty buffer
-    //while (!Serial.available());                 // wait for data
+    while (!Serial.available());                 // wait for data
     while (Serial.available() && Serial.read()); // empty buffer again
 
     // load and configure the DMP
@@ -308,23 +368,52 @@ void setup() {
 }
 
 
-
 // ================================================================
 // ===                    MAIN PROGRAM LOOP                     ===
 // ================================================================
 
 void loop() {
+
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
 
     // wait for MPU interrupt or extra packet(s) available
     while (!mpuInterrupt && fifoCount < packetSize) {
 
-     
-      sendDataPacket();
-      if (Serial.available() > 0) {
-        updateByteData(Serial.read());
+
+
+      while (mode == 0) {
+        if (Serial.available()) {
+          mode = Serial.read();
+        }
       }
+      
+      if (mode == 1) {
+        if (Serial.available()) {
+          mode = Serial.read();
+        }
+ 
+        sendDataPacket();
+      }
+
+      if (mode == 2) {
+        Still_Alive();
+        mode = 0;
+      }
+      
+      if (mode == 3) {
+        if (Serial.available()) {
+          mode = Serial.read();
+          break;
+        }
+        for (int i=0; i<LED_COUNT*10; i++) {
+          rainbow(i);
+          delay(100);
+        }
+  
+      }
+
+      mode = Serial.read();
          
     }
 
@@ -353,61 +442,19 @@ void loop() {
         // (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize;
 
-        #ifdef OUTPUT_READABLE_QUATERNION
-            // display quaternion values in easy matrix form: w x y z
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            Serial.print("quat\t");
-            Serial.print(q.w);
-            Serial.print("\t");
-            Serial.print(q.x);
-            Serial.print("\t");
-            Serial.print(q.y);
-            Serial.print("\t");
-            Serial.println(q.z);
-        #endif
 
-        #ifdef OUTPUT_READABLE_EULER
-            // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetEuler(euler, &q);
-            Serial.print("euler\t");
-            Serial.print(euler[0] * 180/M_PI);
-            Serial.print("\t");
-            Serial.print(euler[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(euler[2] * 180/M_PI);
-        #endif
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            //gyro[0] = (byte) serializeGyroData([0] * 180/M_PI);
-            //gyro[1] = (byte) serializeGyroData(ypr[1] * 180/M_PI);
-            //gyro[2] = (byte) serializeGyroData(ypr[2] * 180/M_PI);
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+            updateGyroData(((byte) (ypr[1] * 180/M_PI)), ((byte) (ypr[2] * 180/M_PI)));
+            gyro_list[0] = abs(((byte) (ypr[0] * 180/M_PI) * 2.5));
+            gyro_list[1] = abs(((byte) (ypr[1] * 180/M_PI) * 2.5));
+            gyro_list[2] = abs(((byte) (ypr[2] * 180/M_PI) * 2.5));
         #endif
-
-        #ifdef OUTPUT_READABLE_REALACCEL
-            // display real acceleration, adjusted to remove gravity
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetAccel(&aa, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-            Serial.print("areal\t");
-            Serial.print(aaReal.x);
-            Serial.print("\t");
-            Serial.print(aaReal.y);
-            Serial.print("\t");
-            Serial.println(aaReal.z);
-        #endif
-
+        
         #ifdef OUTPUT_READABLE_WORLDACCEL
             // display initial world-frame acceleration, adjusted to remove gravity
             // and rotated based on known orientation from quaternion
@@ -416,29 +463,10 @@ void loop() {
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
             mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-            //accel[0] = (byte) serializeAccelData(aaWorld.x);
-            //accel[1] = (byte) serializeAccelData(aaWorld.y);
-            //accel[2] = (byte) serializeAccelData(aaWorld.z - 180);
-            Serial.print("aworld\t");
-            Serial.print(aaWorld.x);
-            Serial.print("\t");
-            Serial.print(aaWorld.y);
-            Serial.print("\t");
-            Serial.println(aaWorld.z - 180);
-        #endif
-    
-        #ifdef OUTPUT_TEAPOT
-            // display quaternion values in InvenSense Teapot demo format:
-            teapotPacket[2] = fifoBuffer[0];
-            teapotPacket[3] = fifoBuffer[1];
-            teapotPacket[4] = fifoBuffer[4];
-            teapotPacket[5] = fifoBuffer[5];
-            teapotPacket[6] = fifoBuffer[8];
-            teapotPacket[7] = fifoBuffer[9];
-            teapotPacket[8] = fifoBuffer[12];
-            teapotPacket[9] = fifoBuffer[13];
-            Serial.write(teapotPacket, 14);
-            teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
+            accel[0] = (byte) conv(aaWorld.x);
+            accel[1] = (byte) conv(aaWorld.y);
+            accel[2] = (byte) conv(aaWorld.z - 180);
+           
         #endif
 
         // blink LED to indicate activity
