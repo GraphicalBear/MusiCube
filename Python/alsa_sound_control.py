@@ -26,7 +26,7 @@ def play_song():
         file_path = '/home/pi/Music/Tetris_Theme.mp3'
     mixer.music.load(file_path)
     mixer.music.play()
-    serialPort.write(bytes([picker]))
+    serialPort.write(picker)
 
 serialPort.flushInput()
 serialPort.flushOutput()
@@ -55,6 +55,6 @@ while running:
     if abs(next_value) > 1500:
         elapsed_time = time.time()
         serialPort.write(bytes([1]))
-    if abs(elapsed_time - time.time()) >= 25:
+    if abs(elapsed_time - time.time()) >= 15:
         play_song()
         serialPort.write(bytes([0]))
