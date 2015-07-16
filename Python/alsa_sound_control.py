@@ -26,7 +26,7 @@ def play_song():
         file_path = '/home/pi/Music/Tetris_Theme.mp3'
     mixer.music.load(file_path)
     mixer.music.play()
-    serialPort.write(picker)
+    serialPort.write(bytes([picker])[0])
     time.sleep(184)
 
 serialPort.flushInput()
