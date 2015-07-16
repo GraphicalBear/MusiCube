@@ -38,6 +38,7 @@ elapsed_time = time.time()
 while running:
     if serialPort.inWaiting() > 0:
         next_value = serialPort.readline()
+        print next_value
         try:
             next_value = int(next_value)
         except TypeError:
