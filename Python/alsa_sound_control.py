@@ -40,6 +40,8 @@ serialPort.write(bytes([1]))
 elapsed_time = time.time()
 
 while running:
+    print "EL" + elapsed_time
+    print "CT" + time.time()
     if serialPort.inWaiting() > 0:
         next_value = serialPort.readline()
         try:
