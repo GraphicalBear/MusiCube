@@ -52,10 +52,9 @@ while running:
          next_value = float(0)
         serialPort.flushInput()
         print next_value
-    if abs(next_value) > 1000:
+    if abs(next_value) > 1500:
         elapsed_time = time.time()
         serialPort.write(bytes([1]))
-    else:
-        if elapsed_time - time.time() >= 25:
-            play_song()
-            serialPort.write(bytes([0]))
+    if abs(elapsed_time - time.time()) >= 25:
+        play_song()
+        serialPort.write(bytes([0]))
