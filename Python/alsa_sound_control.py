@@ -11,6 +11,9 @@ next_value = 25
 
 serialPort = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200)
 
+for x in range(3):
+    serialPort.readline()
+
 def play_song():
     # picker = random.randint(2, 4)
     global serialPort
@@ -38,8 +41,12 @@ elapsed_time = time.time()
 
 while running:
     if serialPort.inWaiting() > 0:
-        next_value = float(serialPort.readline())
+        next_value = serialPort.readline()
         print next_value
+        try:
+            next_value = int(next_value)
+        except TypeError:
+            next_value = 0
     if abs(next_value) > 1000:
         elapsed_time = time.time()
         serialPort.write(bytes([1]))
