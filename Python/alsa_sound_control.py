@@ -10,7 +10,7 @@ running = True
 elapsed_time = 0
 next_value = 25
 
-serialPort = serial.Serial(port = '', baudrate = 115200,).open()
+serialPort = serial.Serial(port = '/dev/ttyUSB0', baudrate = 115200)
 
 def play_song():
     # picker = random.randint(2, 4)
@@ -24,15 +24,15 @@ def play_song():
         file_path = '/home/pi/Music/Tetris_Theme.mp3'
     mixer.music.load(file_path)
     mixer.music.play()
-    serialPort.write(picker)
+    serialPort.write(bytes([picker]))
 
 serialPort.flushInput()
 serialPort.flushOutput()
 
 for x in range(10):
-    serialPort.write(0)
+    serialPort.write(bytes([0]))
 
-serialPort.write(1)
+serialPort.write(bytes([1]))
 
 elapsed_time = time.time()
 
@@ -41,11 +41,11 @@ while running:
         next_value = serialPort.readline()
     if next_value < 20 or next_value > 30:
         elapsed_time = time.time()
-        serialPort.write(1)
+        serialPort.write(bytes([1]))
     if next_value >= 20 and next_value <= 30:
         if elapsed_time - time.time() >= 25:
             play_song()
-            serialPort.write(0)
+            serialPort.write(bytes([0]))
 
 # os.startfile('filepath')
 #
