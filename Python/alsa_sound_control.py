@@ -28,8 +28,9 @@ def play_song():
 serialPort.flushInput()
 serialPort.flushOutput()
 
-for x in range(10):
+for x in range(100):
     serialPort.write(bytes([0]))
+    time.sleep(0.2)
 
 serialPort.write(bytes([1]))
 
