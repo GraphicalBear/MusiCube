@@ -58,4 +58,5 @@ while running:
         serialPort.write(bytes([1]))
     if abs(elapsed_time - time.time()) >= 15:
         play_song()
+        elapsed_time = time.time()
         serialPort.write(bytes([0]))
