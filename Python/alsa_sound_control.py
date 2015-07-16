@@ -41,7 +41,10 @@ elapsed_time = time.time()
 
 while running:
     if serialPort.inWaiting() > 0:
-        next_value = float(serialPort.readline())
+        next_value = serialPort.readline()
+        if next_value is str:
+            serialPort.flushInput()
+            next_value = 0
         serialPort.flushInput()
         print next_value
     if abs(next_value) > 1000:
