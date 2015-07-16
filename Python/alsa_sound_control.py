@@ -27,6 +27,7 @@ def play_song():
     mixer.music.load(file_path)
     mixer.music.play()
     serialPort.write(picker)
+    time.sleep(184)
 
 serialPort.flushInput()
 serialPort.flushOutput()
