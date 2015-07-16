@@ -45,7 +45,7 @@ while running:
         try:
             next_value = float(next_value)
         except ValueError:
-         next_value = (float) 0.0;
+         next_value = float(0)
         serialPort.flushInput()
         print next_value
     if abs(next_value) > 1000:
